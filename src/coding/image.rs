@@ -2,9 +2,9 @@ use crate::image::compression::Compression;
 
 #[derive(Debug)]
 pub struct ImageCoding {
-    input_path: String,
-    output_path: String,
-    compression: Compression,
+    pub input_path: String,
+    pub output_path: String,
+    pub compression: Compression,
 }
 
 impl ImageCoding {

@@ -1,8 +1,8 @@
 pub mod base;
 pub mod image;
 
-use crate::coding::base::BaseCoding;
-use crate::coding::image::ImageCoding;
+use self::base::BaseCoding;
+use self::image::ImageCoding;
 
 pub enum Type {
     Image(ImageCoding),

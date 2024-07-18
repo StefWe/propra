@@ -45,21 +45,26 @@ pub struct Header {
 }
 
 impl Header {
-    pub fn from_propra(data: [u8; 30]) -> Self {
-        let mut header = Header::new();
-        header.width = ((data[14] as u16) << 8) | data[13] as u16;
-        header.height = ((data[16] as u16) << 8) | data[15] as u16;
-        header
+    pub fn from_propra(&mut self, data: [u8; 30]) {
+        self.compression = if data[12] == 1 {
+            Compression::Rle
+        } else if data[12] == 2 {
+            Compression::Huffman
+        } else {
+            Compression::Uncompressed
+        };
+        self.width = ((data[14] as u16) << 8) | data[13] as u16;
+        self.height = ((data[16] as u16) << 8) | data[15] as u16;
     }
 
-    pub fn from_tga(data: [u8; 18]) -> Self {
-        let mut header = Header::new();
-        if data[2] == 10 {
-            header.compression = Compression::Rle
+    pub fn from_tga(&mut self, data: [u8; 18]) {
+        self.compression = if data[2] == 10 {
+            Compression::Rle
+        } else {
+            Compression::Uncompressed
         };
-        header.width = ((data[13] as u16) << 8) | data[12] as u16;
-        header.height = ((data[15] as u16) << 8) | data[14] as u16;
-        header
+        self.width = ((data[13] as u16) << 8) | data[12] as u16;
+        self.height = ((data[15] as u16) << 8) | data[14] as u16;
     }
 
     pub fn to_tga(&self) -> [u8; 18] {
@@ -77,6 +82,21 @@ impl Header {
         data
     }
 
+    pub fn to_tga_iter(&self, src: impl Iterator<Item = u8>) -> impl Iterator<Item = u8> {
+        let bits_per_pixel = 3 * 8;
+        let mut data: [u8; 18] = [0; 18];
+        data[2] = self.compression.get_value(&ImageType::Tga);
+        data[10] = self.height as u8;
+        data[11] = (self.height >> 8) as u8;
+        data[12] = self.width as u8;
+        data[13] = (self.width >> 8) as u8;
+        data[14] = self.height as u8;
+        data[15] = (self.height >> 8) as u8;
+        data[16] = bits_per_pixel;
+        data[17] = 32;
+        data.into_iter().chain(src)
+    }
+
     pub fn to_propra(&self) -> [u8; 30] {
         let bits_per_pixel = 3 * 8;
         let mut data: [u8; 30] = [0; 30];
@@ -92,17 +112,9 @@ impl Header {
         data
     }
 
-    fn new() -> Self {
+    pub fn new(compression: Compression) -> Self {
         Header {
-            compression: Compression::Uncompressed,
-            width: 0,
-            height: 0,
-        }
-    }
-
-    fn new_rle() -> Self {
-        Header {
-            compression: Compression::Rle,
+            compression,
             width: 0,
             height: 0,
         }
@@ -115,7 +127,7 @@ mod tests {
 
     #[test]
     fn check_to_tga_one_pixel_uncompressed_image() {
-        let mut header = Header::new();
+        let mut header = Header::new(Compression::Uncompressed);
         header.width = 1;
         header.height = 1;
         let result: [u8; 18] = [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 24, 32];
@@ -124,7 +136,7 @@ mod tests {
 
     #[test]
     fn check_to_tga_uncompressed_image() {
-        let mut header = Header::new();
+        let mut header = Header::new(Compression::Uncompressed);
         header.width = 500;
         header.height = 593;
         let result: [u8; 18] = [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 81, 2, 244, 1, 81, 2, 24, 32];
@@ -134,7 +146,8 @@ mod tests {
     #[test]
     fn check_from_tga_one_pixel_uncompressed_image() {
         let data: [u8; 18] = [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 24, 32];
-        let header = Header::from_tga(data);
+        let mut header = Header::new(Compression::Rle);
+        header.from_tga(data);
         assert_eq!(1 * 1, header.width * header.height);
         assert!(header.compression == Compression::Uncompressed);
     }
@@ -142,7 +155,8 @@ mod tests {
     #[test]
     fn check_from_tga_uncompressed_image() {
         let data: [u8; 18] = [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 81, 2, 244, 1, 81, 2, 24, 32];
-        let header = Header::from_tga(data);
+        let mut header = Header::new(Compression::Rle);
+        header.from_tga(data);
         assert_eq!(500, header.width);
         assert_eq!(593, header.height);
         assert!(header.compression == Compression::Uncompressed);
@@ -151,7 +165,8 @@ mod tests {
     #[test]
     fn check_from_tga_rle_image() {
         let data: [u8; 18] = [0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 81, 2, 244, 1, 81, 2, 24, 32];
-        let header = Header::from_tga(data);
+        let mut header = Header::new(Compression::Uncompressed);
+        header.from_tga(data);
         assert_eq!(500, header.width);
         assert_eq!(593, header.height);
         assert!(header.compression == Compression::Rle);
