@@ -4,6 +4,7 @@ mod image;
 mod input;
 
 use crate::image::compression::Compression;
+use crate::image::Image;
 use input::validation;
 use std::env;
 
@@ -22,9 +23,9 @@ fn main() {
     };
 
     let image = coding::image::ImageCoding {
-        input_path: "/home/stefan/Documents/uni/1584_Propra/KE1/KE1_TestBilder/einPixel.propra"
+        input_path: "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/test_03.propra"
             .to_string(),
-        output_path: "/home/stefan/Documents/rust/propra/img/einPixel.tga".to_string(),
+        output_path: "/home/stefan/Dokumente/rust/propra/img/test_03.tga".to_string(),
         compression: Compression::Uncompressed,
     };
     let result: Result<coding::Type, &'static str> = Ok(coding::Type::Image(image));
@@ -33,15 +34,13 @@ fn main() {
         Ok(s) => run_job(s),
         Err(e) => println!("{}", e),
     }
-
-    let _ = reader();
 }
 
 fn run_job(job: coding::Type) {
     match job {
         coding::Type::Image(i) => {
             println!("Das ist die Quelle {:#?}", i);
-            //let i = Image::from_propra(i).to_tga();
+            let _img = Image::from_propra(i).to_tga();
             println!("Bild from_propra erzeugt");
         }
         coding::Type::Base(b) => println!("BaseX coding wird erledigt: {:#?}", b),

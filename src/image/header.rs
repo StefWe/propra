@@ -40,8 +40,8 @@ use super::ImageType;
 
 pub struct Header {
     compression: Compression,
-    width: u16,
-    height: u16,
+    pub width: u16,
+    pub height: u16,
 }
 
 impl Header {
@@ -82,7 +82,7 @@ impl Header {
         data
     }
 
-    pub fn to_tga_iter(&self, src: impl Iterator<Item = u8>) -> impl Iterator<Item = u8> {
+    pub fn to_tga_iter(&self) -> impl Iterator<Item = u8> {
         let bits_per_pixel = 3 * 8;
         let mut data: [u8; 18] = [0; 18];
         data[2] = self.compression.get_value(&ImageType::Tga);
@@ -94,7 +94,7 @@ impl Header {
         data[15] = (self.height >> 8) as u8;
         data[16] = bits_per_pixel;
         data[17] = 32;
-        data.into_iter().chain(src)
+        data.into_iter()
     }
 
     pub fn to_propra(&self) -> [u8; 30] {

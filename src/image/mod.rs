@@ -1,12 +1,14 @@
 use self::header::Header;
 use crate::coding::image::ImageCoding;
+use pixel_shift::PixelShift;
+use std::fs;
 use std::fs::File;
-use std::io::BufReader;
-use std::io::Bytes;
-use std::io::Read;
+use std::io::{BufReader, BufWriter, Bytes, Read, Write};
+use std::path::Path;
 
 pub mod compression;
 mod header;
+mod pixel_shift;
 
 #[derive(PartialEq)]
 pub enum ImageType {
@@ -17,50 +19,72 @@ pub enum ImageType {
 pub struct Image {
     src_image: ImageType,
     header: Header,
-    buffer: BufReader<File>,
+    dest: String,
+    buffer: Bytes<BufReader<File>>,
 }
 
 impl Image {
     pub fn from_propra(src: ImageCoding) -> Self {
-        //pub fn from_propra(src: ImageCoding) -> impl Iterator<Item = Result<u8, Error>> {
-        //let mut buffer: [u8; 9000] = [0; 9000];
         let file = File::open(src.input_path).unwrap();
-        //let mut reader = BufReader::new(f);
+        let mut buffer = BufReader::new(file).bytes();
 
-        //Image::new(BufReader::new(file).bytes())
-
-        /*for b in BufReader::new(&file).bytes() {
-            print!("");
-        }*/
-
-        Image {
-            src_image: ImageType::Propra,
-            header: Header::new(src.compression),
-            buffer: BufReader::new(file),
+        let mut data: [u8; 30] = [0; 30];
+        let mut i = 0;
+        while i < data.len() {
+            match &buffer.next() {
+                Some(value) => match value {
+                    Ok(b) => data[i] = *b,
+                    Err(_) => (),
+                },
+                None => (),
+            }
+            i += 1;
         }
 
-        //BufReader::new(file).bytes()
-        /*
-        match result {
-            std::result::Result::Ok(f) => BufReader::new(f).bytes(),
-            std::result::Result::Err(e) => std::io::Error::new(e),
-        }*/
-
-        /*
-        let n = f.read(&mut buffer[..]);
-        let mut bytes_in_buffer = match n {
-            std::result::Result::Ok(n) => n,
-            std::result::Result::Err(_) => 0,
-        };
-        //let mut n = f.read(&mut buffer[..]);
-        //
-        BufReader::new(f).bytes()*/
+        let mut header = Header::new(src.compression);
+        header.from_propra(data);
+        Image {
+            src_image: ImageType::Propra,
+            header,
+            dest: src.output_path,
+            buffer,
+        }
     }
 
     pub fn to_tga(&mut self) {
-        for b in self.buffer.bytes() {
-            println!("{:#?}", b);
+        let file = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(Path::new(&self.dest))
+            .unwrap();
+        let mut file = BufWriter::new(file);
+
+        let mut data: Vec<u8> = self.header.to_tga().to_vec();
+
+        match self.src_image {
+            ImageType::Tga => (),
+            ImageType::Propra => {
+                for b in PixelShift::from(self) {
+                    data.push(b);
+                }
+            }
         }
-        //BufWrite(self.pixel_shift(self.header.to_tga(self.iter)));
+
+        let _ = file.write_all(&data);
+        file.flush().unwrap();
+    }
+}
+
+impl Iterator for Image {
+    type Item = u8;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match &self.buffer.next() {
+            Some(i) => match i {
+                Ok(b) => Some(*b),
+                Err(_) => None,
+            },
+            None => None,
+        }
     }
 }
