@@ -31,7 +31,7 @@
     data[13..14] = width
     data[15..16] = height
     data[17] = bitsPerPixel //default -> 24bit
-    data[18..25] = dataSegmentLength
+    data[18..25] = data_segment_length
     data[26..29] = checksum
 */
 
@@ -100,14 +100,23 @@ impl Header {
     pub fn to_propra(&self) -> [u8; 30] {
         let bits_per_pixel = 3 * 8;
         let mut data: [u8; 30] = [0; 30];
-        data[..11].copy_from_slice("ProPraWiSe22".as_bytes());
+        data[..12].copy_from_slice("ProPraWiSe22".as_bytes());
         data[12] = self.compression.get_value(&ImageType::Propra);
         data[13] = self.width as u8;
         data[14] = (self.width >> 8) as u8;
         data[15] = self.height as u8;
         data[16] = (self.height >> 8) as u8;
         data[17] = bits_per_pixel;
-        //data[18..25] = dataSegmentLength
+        let data_segment_length: u64 =
+            self.width as u64 * self.height as u64 * (bits_per_pixel / 8) as u64;
+        data[18] = data_segment_length as u8;
+        data[19] = (data_segment_length >> 8) as u8;
+        data[20] = (data_segment_length >> 8) as u8;
+        data[21] = (data_segment_length >> 8) as u8;
+        data[22] = (data_segment_length >> 8) as u8;
+        data[23] = (data_segment_length >> 8) as u8;
+        data[24] = (data_segment_length >> 8) as u8;
+        data[25] = (data_segment_length >> 8) as u8;
         //data[26..29] = checksum
         data
     }

@@ -14,7 +14,7 @@ impl CheckSum {
         format!("{:#010X}", result)
     }
 
-    fn calc(self) -> u32 {
+    pub fn calc(self) -> u32 {
         if self.i == 1 {
             return 1;
         }

@@ -23,9 +23,9 @@ fn main() {
     };
 
     let image = coding::image::ImageCoding {
-        input_path: "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/test_03.propra"
+        input_path: "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/einPixel.tga"
             .to_string(),
-        output_path: "/home/stefan/Dokumente/rust/propra/img/test_03.tga".to_string(),
+        output_path: "/home/stefan/Dokumente/rust/propra/img/einPixel.propra".to_string(),
         compression: Compression::Uncompressed,
     };
     let result: Result<coding::Type, &'static str> = Ok(coding::Type::Image(image));
@@ -40,10 +40,10 @@ fn run_job(job: coding::Type) {
     match job {
         coding::Type::Image(i) => {
             println!("Das ist die Quelle {:#?}", i);
-            let _img = Image::from_propra(i).to_tga();
+            Image::produce(i);
             println!("Bild from_propra erzeugt");
         }
-        coding::Type::Base(b) => println!("BaseX coding wird erledigt: {:#?}", b),
+        coding::Type::Base(b) => println!("BaseX coding not yet implemented {:#?}", b),
     }
 }
 
