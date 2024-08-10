@@ -1,6 +1,6 @@
 use self::header::Header;
+use crate::check_sum::CheckSum;
 use crate::coding::image::ImageCoding;
-use crate::CheckSum;
 use propra::PixelPropra;
 use std::fs;
 use std::fs::File;

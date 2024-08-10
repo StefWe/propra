@@ -14,7 +14,7 @@ enum Coding {
 }
 
 impl BaseCoding {
-    pub fn new(args: &Vec<String>) -> Result<Self, &'static str> {
+    pub fn new(args: &[String]) -> Result<Self, &'static str> {
         let input_path = match BaseCoding::set_input_path(args) {
             Ok(s) => s,
             Err(e) => return Err(e),
@@ -44,7 +44,7 @@ impl BaseCoding {
         })
     }
 
-    fn set_input_path(args: &Vec<String>) -> Result<String, &'static str> {
+    fn set_input_path(args: &[String]) -> Result<String, &'static str> {
         for s in args.iter() {
             match s {
                 s if s.starts_with("--input=") => return Ok(s.clone().split_off(8)),
@@ -54,7 +54,7 @@ impl BaseCoding {
         Err("Kein --input Parameter gefunden")
     }
 
-    fn set_coding(args: &Vec<String>) -> Result<Coding, &'static str> {
+    fn set_coding(args: &[String]) -> Result<Coding, &'static str> {
         for s in args.iter() {
             match s {
                 s if s.eq("--decode-base-32") => return Ok(Coding::DecodeBase32),
@@ -67,7 +67,7 @@ impl BaseCoding {
         Err("Keine gültige Codierung angegeben")
     }
 
-    fn set_alphabet(args: &Vec<String>) -> Result<String, &'static str> {
+    fn set_alphabet(args: &[String]) -> Result<String, &'static str> {
         for s in args.iter() {
             if s.starts_with("--encode-base-n") && (s.len() > 16) {
                 return Ok(s.clone().split_off(16));

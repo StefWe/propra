@@ -1,16 +1,6 @@
 /*Image Header
 
 * TGA 18 Bytes großer Header
-    System.out.println("Bild-ID: " + id);
-    System.out.println("Farbpalettentyp: " + colorPaletteType);
-    System.out.println("Bild-Typ: " + imageType);
-    System.out.println("Palettenbeginn: " + palletStart);
-    System.out.println("Palettenlänge: " + palletLength);
-    System.out.println("Größe (in Bits) eines Paletteneintrags: " + paletteEntrySizeInBits);
-    System.out.println("X-Koordinate für Nullpunkt: " + zeroX);
-    System.out.println("Y-Koordinate für Nullpunkt: " + zeroY);
-    System.out.println("Bild-Attribut-Byte: " + Integer.toBinaryString((attribute & 0xFF) + 256).substring(1));
-
     data[0] = 0 id
     data[1] = 0 colorPaletteType
     data[2] = imageType -> (2=uncompressed / 10=rle)

@@ -8,7 +8,7 @@ pub struct ImageCoding {
 }
 
 impl ImageCoding {
-    pub fn new(args: &Vec<String>) -> Result<Self, &'static str> {
+    pub fn new(args: &[String]) -> Result<Self, &'static str> {
         let input_path = match ImageCoding::set_input_path(args) {
             Ok(s) => s,
             Err(e) => return Err(e),
@@ -35,7 +35,7 @@ impl ImageCoding {
         })
     }
 
-    fn set_input_path(args: &Vec<String>) -> Result<String, &'static str> {
+    fn set_input_path(args: &[String]) -> Result<String, &'static str> {
         for s in args.iter() {
             match s {
                 s if s.starts_with("--input=") => return Ok(s.clone().split_off(8)),
@@ -45,7 +45,7 @@ impl ImageCoding {
         Err("Kein --input Parameter gefunden")
     }
 
-    fn set_output_path(args: &Vec<String>) -> Result<String, &'static str> {
+    fn set_output_path(args: &[String]) -> Result<String, &'static str> {
         for s in args.iter() {
             match s {
                 s if s.starts_with("--output=") => return Ok(s.clone().split_off(9)),
@@ -55,7 +55,7 @@ impl ImageCoding {
         Err("Kein --output Parameter gefunden")
     }
 
-    fn set_compression(args: &Vec<String>) -> Result<Compression, &'static str> {
+    fn set_compression(args: &[String]) -> Result<Compression, &'static str> {
         for s in args.iter() {
             match s {
                 s if s.eq("--compression=huffman") => return Ok(Compression::Huffman),

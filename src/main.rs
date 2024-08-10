@@ -3,7 +3,6 @@ mod coding;
 mod image;
 mod input;
 
-use crate::image::compression::Compression;
 use crate::image::Image;
 use input::validation;
 use std::env;
@@ -21,14 +20,6 @@ fn main() {
             Err("Programm beendet.")
         }
     };
-
-    let image = coding::image::ImageCoding {
-        input_path: "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/einPixel.tga"
-            .to_string(),
-        output_path: "/home/stefan/Dokumente/rust/propra/img/einPixel.propra".to_string(),
-        compression: Compression::Uncompressed,
-    };
-    let result: Result<coding::Type, &'static str> = Ok(coding::Type::Image(image));
 
     match result {
         Ok(s) => run_job(s),
@@ -65,31 +56,4 @@ fn print_program_description() {
     println!("Ein Aufruf sieht dann z.B. wie folgt aus: ");
     println!("--input=../KE2_TestBilder/test_06_base32.propra.base-32 --decode-base-32");
     println!("--input=../KE2_TestBilder/test_02_rle.tga               --encode-base-32");
-}
-
-use crate::check_sum::CheckSum;
-use std::fs::File;
-use std::io::Read;
-
-pub fn reader() -> std::io::Result<()> {
-    let mut f =
-        File::open("/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/Oversize.propra")?;
-    let mut buffer: [u8; 9000] = [0; 9000];
-
-    let mut checksum = CheckSum::new();
-
-    // read up to 10 bytes
-    let mut n = f.read(&mut buffer[..])?;
-    let mut offset = 30;
-    while n > 0 {
-        for i in &buffer[offset..n] {
-            checksum.add(*i);
-        }
-        offset = 0;
-
-        n = f.read(&mut buffer[..])?;
-    }
-    println!("Prüfsumme beträgt {}", checksum.hex());
-    println!("The bytes: {:?}", &buffer[..100]);
-    Ok(())
 }

@@ -1,7 +1,27 @@
+/*
+*   P = An * 2^16 + Bn
+*
+*   An = [Sum(i+data[i])] mod X | i=1 bis n
+*
+*   B0 = 1
+*   Bi = [Bi-1 + Ai] mod X   für alle i {1,2,...,n}
+*
+*   mit X = 65521 und n = Länge des Datensegments
+*
+*   Mit data[i] wird das i-te Byte aus dem Datensegment gelesen.
+*   Das erste Byte wird im 1 und nicht mit 0 addressiert.
+*/
+
 pub struct CheckSum {
     i: u32,
     an: u32,
     bn: u32,
+}
+
+impl Default for CheckSum {
+    fn default() -> Self {
+        CheckSum::new()
+    }
 }
 
 impl CheckSum {
@@ -9,12 +29,12 @@ impl CheckSum {
         CheckSum { i: 1, an: 0, bn: 1 }
     }
 
-    pub fn hex(self) -> String {
+    pub fn hex(&self) -> String {
         let result = self.calc();
         format!("{:#010X}", result)
     }
 
-    pub fn calc(self) -> u32 {
+    pub fn calc(&self) -> u32 {
         if self.i == 1 {
             return 1;
         }
@@ -37,7 +57,7 @@ impl CheckSum {
         self.i = self.i.wrapping_add(1);
     }
 
-    fn an_calc(&mut self, data: u8) -> u32 {
+    fn an_calc(&self, data: u8) -> u32 {
         self.i + data as u32
     }
 
@@ -49,8 +69,12 @@ impl CheckSum {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::fs::File;
-    use std::io::Read;
+
+    #[test]
+    fn check_an_calc() {
+        let checksum = CheckSum::new();
+        assert_eq!(42, checksum.an_calc(41));
+    }
 
     #[test]
     fn check_sum_empty_data() {
@@ -149,53 +173,5 @@ mod tests {
         }
         checksum.add_vec(v);
         assert_eq!("0x079ED65E", checksum.hex());
-    }
-
-    #[test]
-    fn ke1_03_propra() {
-        let mut f = File::open(
-            "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/test_03_uncompressed.propra",
-        )
-        .unwrap();
-        let mut buffer: [u8; 9000] = [0; 9000];
-
-        let mut checksum = CheckSum::new();
-
-        // read up to 10 bytes
-        let mut n = f.read(&mut buffer[..]).unwrap();
-        let mut offset = 30;
-        while n > 0 {
-            for i in &buffer[offset..n] {
-                checksum.add(*i);
-            }
-            offset = 0;
-
-            n = f.read(&mut buffer[..]).unwrap();
-        }
-        assert_eq!("0x349797E6", checksum.hex());
-    }
-
-    #[test]
-    fn ke1_04_propra() {
-        let mut f = File::open(
-            "/home/stefan/Dokumente/uni/1584_Propra/KE1/KE1_TestBilder/test_04_uncompressed.propra",
-        )
-        .unwrap();
-        let mut buffer: [u8; 9000] = [0; 9000];
-
-        let mut checksum = CheckSum::new();
-
-        // read up to 10 bytes
-        let mut n = f.read(&mut buffer[..]).unwrap();
-        let mut offset = 30;
-        while n > 0 {
-            for i in &buffer[offset..n] {
-                checksum.add(*i);
-            }
-            offset = 0;
-
-            n = f.read(&mut buffer[..]).unwrap();
-        }
-        assert_eq!("0x280C60A7", checksum.hex());
     }
 }
