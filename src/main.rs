@@ -4,15 +4,20 @@ mod image;
 mod input;
 
 use crate::image::Image;
-use input::validation;
+use coding::image::ImageCoding;
+use input::check_image_or_base_coding_needed;
 use std::env;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
     let result = match args.len() {
-        3 | 4 => match validation(&args) {
+        3 => match check_image_or_base_coding_needed(&args) {
             Ok(s) => Ok(s),
+            Err(e) => Err(e),
+        },
+        4 => match ImageCoding::new(&args) {
+            Ok(s) => Ok(coding::Type::Image(s)),
             Err(e) => Err(e),
         },
         _ => {

@@ -29,6 +29,7 @@ impl CheckSum {
         CheckSum { i: 1, an: 0, bn: 1 }
     }
 
+    #[allow(dead_code)]
     pub fn hex(&self) -> String {
         let result = self.calc();
         format!("{:#010X}", result)
@@ -42,6 +43,7 @@ impl CheckSum {
         self.an * u32::pow(2, 16) + self.bn
     }
 
+    #[allow(dead_code)]
     pub fn add_vec(&mut self, data: Vec<u8>) {
         if data.is_empty() {
             return;

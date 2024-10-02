@@ -32,14 +32,14 @@ impl Image {
         let to_tga = src.output_path.ends_with(".tga");
 
         match (from_tga, to_tga) {
-            (false, false) => Image::from_propra(src).to_propra(),
-            (false, true) => Image::from_propra(src).to_tga(),
-            (true, false) => Image::from_tga(src).to_propra(),
-            (true, true) => Image::from_tga(src).to_tga(),
+            (false, false) => Image::propra(src).convert_to_propra(),
+            (false, true) => Image::propra(src).convert_to_tga(),
+            (true, false) => Image::tga(src).convert_to_propra(),
+            (true, true) => Image::tga(src).convert_to_tga(),
         }
     }
 
-    pub fn from_tga(src: ImageCoding) -> Self {
+    pub fn tga(src: ImageCoding) -> Self {
         let file = File::open(src.input_path).unwrap();
         let mut buffer = BufReader::new(file).bytes();
 
@@ -56,17 +56,15 @@ impl Image {
             i += 1;
         }
 
-        let mut header = Header::new(src.compression);
-        header.from_tga(data);
         Image {
             src_image: ImageType::Tga,
-            header,
+            header: Header::from_tga(src.compression, data),
             dest: src.output_path,
             buffer,
         }
     }
 
-    pub fn from_propra(src: ImageCoding) -> Self {
+    pub fn propra(src: ImageCoding) -> Self {
         let file = File::open(src.input_path).unwrap();
         let mut buffer = BufReader::new(file).bytes();
 
@@ -83,17 +81,15 @@ impl Image {
             i += 1;
         }
 
-        let mut header = Header::new(src.compression);
-        header.from_propra(data);
         Image {
             src_image: ImageType::Propra,
-            header,
+            header: Header::from_propra(src.compression, data),
             dest: src.output_path,
             buffer,
         }
     }
 
-    pub fn to_tga(&mut self) {
+    pub fn convert_to_tga(&mut self) {
         let file = fs::OpenOptions::new()
             .write(true)
             .create(true)
@@ -119,7 +115,7 @@ impl Image {
         file.flush().unwrap();
     }
 
-    pub fn to_propra(&mut self) {
+    pub fn convert_to_propra(&mut self) {
         let file = fs::OpenOptions::new()
             .write(true)
             .create(true)
