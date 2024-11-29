@@ -1,13 +1,13 @@
 #[derive(Debug)]
 #[allow(dead_code)]
 pub struct BaseCoding {
-    input_path: String,
-    alphabet: String,
-    coding: Coding,
+    pub input_path: String,
+    pub alphabet: String,
+    pub coding: Coding,
 }
 
 #[derive(Debug, PartialEq, Eq)]
-enum Coding {
+pub enum Coding {
     DecodeBase32,
     EncodeBase32,
     DecodeBaseN,
