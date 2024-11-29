@@ -1,9 +1,11 @@
+mod base;
 mod check_sum;
 mod coding;
 mod image;
 mod input;
 
 use crate::image::Image;
+use base::Base;
 use coding::image::ImageCoding;
 use input::check_image_or_base_coding_needed;
 use std::env;
@@ -35,11 +37,13 @@ fn main() {
 fn run_job(job: coding::Type) {
     match job {
         coding::Type::Image(i) => {
-            println!("Das ist die Quelle {:#?}", i);
             Image::produce(i);
-            println!("Bild from_propra erzeugt");
+            println!("image coding done");
         }
-        coding::Type::Base(b) => println!("BaseX coding not yet implemented {:#?}", b),
+        coding::Type::Base(b) => {
+            Base::produce(b);
+            println!("base coding done");
+        }
     }
 }
 
