@@ -46,12 +46,8 @@ impl Image {
         let mut data: [u8; 18] = [0; 18];
         let mut i = 0;
         while i < data.len() {
-            match &buffer.next() {
-                Some(value) => match value {
-                    Ok(b) => data[i] = *b,
-                    Err(_) => (),
-                },
-                None => (),
+            if let Some(Ok(b)) = &buffer.next() {
+                data[i] = *b
             }
             i += 1;
         }
@@ -71,12 +67,8 @@ impl Image {
         let mut data: [u8; 30] = [0; 30];
         let mut i = 0;
         while i < data.len() {
-            match &buffer.next() {
-                Some(value) => match value {
-                    Ok(b) => data[i] = *b,
-                    Err(_) => (),
-                },
-                None => (),
+            if let Some(Ok(b)) = &buffer.next() {
+                data[i] = *b
             }
             i += 1;
         }
